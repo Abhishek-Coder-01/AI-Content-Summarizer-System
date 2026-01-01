@@ -128,7 +128,7 @@ const Dashboard = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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'
+          'Authorization': 'Bearer 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'
         },
         body: JSON.stringify({
           model: 'deepseek/deepseek-r1-0528:free',
