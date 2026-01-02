@@ -132,7 +132,9 @@ function Home({ isDemoOpen, setIsDemoOpen }) {
                                             type="button"
                                             className="flex items-center justify-center gap-2 glass-button relative z-[999] pointer-events-auto px-4 py-3 sm:px-6 sm:py-3 md:px-8 md:py-4 text-sm sm:text-base md:text-lg rounded-full font-semibold hover-lift whitespace-nowrap"
                                         >
-                                            <svg
+                                         
+                                            <span>Get Started</span>
+                                               <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 viewBox="0 0 24 24"
                                                 fill="none"
@@ -145,7 +147,6 @@ function Home({ isDemoOpen, setIsDemoOpen }) {
                                                 <path d="M5 12h14"></path>
                                                 <path d="M13 6l6 6-6 6"></path>
                                             </svg>
-                                            <span>Get Started</span>
                                         </button>
                                     </SignInButton>
                                 </SignedOut>
