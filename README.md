@@ -80,9 +80,22 @@ AI-powered Content Summarizer/
 ```
 
 
-## 📸 Screenshots
+# 📸 Screenshots
 
-**Home Page:**
+## Dashboard Mode:
+**1 Home Page:**
+<img width="1914" height="1054" alt="Screenshot 2026-01-02 123028" src="https://github.com/user-attachments/assets/47308f9f-d421-49a6-b608-74406e6e4b84" />
+
+**2 Dashboard Page**
+<img width="1918" height="1050" alt="Screenshot 2026-01-02 124139" src="https://github.com/user-attachments/assets/5d765646-cca3-4354-8153-2855326b4faf" />
+
+
+
+# Mobile Mode:
+<img width="493" height="936" alt="Screenshot 2026-01-02 123116" src="https://github.com/user-attachments/assets/f25841cc-f14e-4140-92c6-34d40f576527" />
+
+<img width="497" height="941" alt="Screenshot 2026-01-02 124219" src="https://github.com/user-attachments/assets/deabc695-68f6-4902-b62c-499759cc1ab1" />
+
 
 
 
