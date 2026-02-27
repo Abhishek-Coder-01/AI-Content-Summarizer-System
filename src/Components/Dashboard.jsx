@@ -14,6 +14,12 @@ const Dashboard = () => {
   const [showQR, setShowQR] = useState(false);
   const [progress, setProgress] = useState(0);
   const [processingSteps, setProcessingSteps] = useState([false, false, false, false]);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = window.localStorage.getItem('dashboard-theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
   const [results, setResults] = useState({
     title: '',
@@ -26,6 +32,10 @@ const Dashboard = () => {
   const analysisSectionRef = useRef(null);
   const resultsSectionRef = useRef(null);
   const qrSectionRef = useRef(null);
+  const openRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const openRouterModel = import.meta.env.VITE_OPENROUTER_MODEL || 'deepseek/deepseek-r1-0528';
+  const openRouterAppTitle = import.meta.env.VITE_OPENROUTER_APP_TITLE || 'AI Content Summarizer';
+  const openRouterAppUrl = import.meta.env.VITE_OPENROUTER_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '');
 
   // Handle input text changes
   useEffect(() => {
@@ -36,6 +46,20 @@ const Dashboard = () => {
     setWordCount(words);
     setShowLengthWarning(chars > 0 && chars < 50);
   }, [inputText]);
+
+  // Apply theme class to <html> and persist
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('dashboard-theme', isDark ? 'dark' : 'light');
+    }
+  }, [isDark]);
 
   // Toast notification function
   const showToast = (message, type) => {
@@ -112,6 +136,11 @@ const Dashboard = () => {
       return;
     }
 
+    if (!openRouterApiKey) {
+      showToast('Missing API key. Set VITE_OPENROUTER_API_KEY in .env', 'error');
+      return;
+    }
+
     setCurrentStep(2);
     setIsAnalyzing(true);
     setProgress(0);
@@ -128,10 +157,12 @@ const Dashboard = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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'
+          'Authorization': `Bearer ${openRouterApiKey}`,
+          'HTTP-Referer': openRouterAppUrl,
+          'X-Title': openRouterAppTitle
         },
         body: JSON.stringify({
-          model: 'deepseek/deepseek-r1-0528:free',
+          model: openRouterModel,
           messages: [
             {
               role: 'system',
@@ -160,7 +191,18 @@ SENTIMENT: [sentiment]`
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        const errorText = await response.text();
+        let detail = '';
+        if (errorText) {
+          try {
+            const errorJson = JSON.parse(errorText);
+            detail = errorJson?.error?.message || errorJson?.message || JSON.stringify(errorJson);
+          } catch {
+            detail = errorText;
+          }
+        }
+        const suffix = detail ? `: ${detail}` : '';
+        throw new Error(`API request failed with status ${response.status}${suffix}`);
       }
 
       const data = await response.json();
@@ -377,9 +419,9 @@ SENTIMENT: [sentiment]`
 
 
 
-    <div className="bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 min-h-screen py-4 sm:py-6 md:py-8 px-3 sm:px-4">
+    <div className="dashboard-root bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 dark:from-slate-950 dark:via-slate-900/60 dark:to-slate-950 min-h-screen py-4 sm:py-6 md:py-8 px-3 sm:px-4 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
-
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
 <button
   onClick={() => navigate("/#home")}
   aria-label="Back to Home"
@@ -397,6 +439,8 @@ SENTIMENT: [sentiment]`
     hover:text-gray-900 hover:shadow
     active:shadow-sm
     transition-all duration-300
+    dark:from-slate-800 dark:to-slate-700 dark:text-slate-100 dark:border-slate-600
+    dark:hover:from-slate-700 dark:hover:to-slate-600
   "
 >
   {/* Icon container */}
@@ -452,6 +496,29 @@ SENTIMENT: [sentiment]`
 
 
 
+          <button
+            onClick={() => setIsDark(prev => !prev)}
+            aria-label="Toggle dark mode"
+            className="flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700"
+          >
+            {isDark ? (
+              <>
+                <svg className="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4.75a1 1 0 011 1V7a1 1 0 11-2 0V5.75a1 1 0 011-1zm0 11a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zm7.25-3.75a1 1 0 010 2H18a1 1 0 110-2h1.25zM6 12a1 1 0 100 2H4.75a1 1 0 110-2H6zm10.01 4.76a1 1 0 011.42 0l.88.88a1 1 0 01-1.42 1.42l-.88-.88a1 1 0 010-1.42zM5.69 5.69a1 1 0 011.42 0l.88.88A1 1 0 016.57 7.99l-.88-.88a1 1 0 010-1.42zM12 17a1 1 0 011 1v1.25a1 1 0 11-2 0V18a1 1 0 011-1zm-5.31 1.07a1 1 0 010 1.42l-.88.88A1 1 0 114.4 19.95l.88-.88a1 1 0 011.42 0zm11.22-11.2a1 1 0 010 1.41l-.88.88a1 1 0 11-1.42-1.41l.88-.88a1 1 0 011.42 0z" />
+                </svg>
+                <span>Light</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 text-slate-600" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21.64 13.65A9 9 0 1110.35 2.36a1 1 0 01.74 1.93A7 7 0 1019.71 12.9a1 1 0 011.93.75z" />
+                </svg>
+                <span>Dark</span>
+              </>
+            )}
+          </button>
+        </div>
+
         {/* Header */}
         <div className="text-center px-3 sm:px-4 mb-6 md:mb-8 lg:mb-12">
           <div className="relative inline-block mb-3 sm:mb-4 md:mb-6">
@@ -472,7 +539,7 @@ SENTIMENT: [sentiment]`
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-2xl md:text-2xl lg:text-5xl xl:text-6xl font-bold text-slate-800 mb-2 sm:mb-3 md:mb-4">
+          <h1 className="text-2xl sm:text-2xl md:text-2xl lg:text-5xl xl:text-6xl font-bold text-slate-800 dark:text-slate-100 mb-2 sm:mb-3 md:mb-4">
             <span className="gradient-text">AI Content Summarizers System</span>
           </h1>
 
